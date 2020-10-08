@@ -1,2 +1,2 @@
-# Tiva_C_drivers
-these drivers are written from scratch by me for Tiva c (TM4C123GH6PM MCU)
+All these files are written by me except "tm4c123gh6pm.h" which defines all registers. Without including it, you will have to open datasheet and deal with base and offset addresses for all registers so for using drivers directly without any edition, please do not exclude it from any header file
+You do not have to open header files to understand the functionality of each function and how to use it, you just need to read this file very carefuuly since I will explain each function clearly and the enumerations I have created since you will use some of them when you call some of my function in your main
