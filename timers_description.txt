@@ -1,0 +1,202 @@
+This file descripes my functions for GPTMs "general purpose timers" which are 12 ones and classified into two types according to their size:
+1) 6 of 16/32 timers 
+2) 6 of 32/64 wide timers
+
+Each timer has 2 channels: A and B and each channel is 16-bits size, while each wide timer also has 2 channels: A and B but each channel is 32-bits size.
+
+The GPTMs modes are:
+1) one shot mode: refer to page 709 for more details in this mode
+2) periodic: refer to page 709 for more details in this mode
+3) RTC (real time clock generation with a frequency 1 Hz): refer to page 711 for more details in this mode
+4) edge count: refer to page 712 for more details in this mode
+5) edge time: refer to page 714 for more details in this mode
+6) PWM (pulse width modulation): refer to page 716 for more details in this mode
+
+GPTMs have 6 different modes which can work in all 6 timers and all 6 wide timers, some modes work only when both channels are concatinated in timers and wide timers
+to be 32-bits and 64-bits size respectively, another modes work only with only one channel in timers and wide timers to be 16-bits and 32-bits size respectively,
+and there are also some modes that can work well in both individual or concatinted state in timers and wide timers. To know the valid state for each mode refer to 
+table 11-3 in page 708 in datasheet. 
+
+You have the freedom to select the count direction to be either up or down in some modes, while you are forced to use specific direction in the other modes.
+To know the valid direction for each mode refer to table 11-3 in page 708 in datasheet
+
+The prescaler is slightly different in tiva c from another microcontrollers, you can use the prescaler only with individual state not concatinated in both timers
+and wide timers.
+In one shot or periodic mode with down count direction, it acts as a true prescaler meaning that it takes your processor frequency and divide it by the prescaler value
+and the result is the frequncy driving the timer, while in any another individual state (including one shot or periodic with up count direction) it acts
+as a time extension, so for example if you use only one channel in any 16/32 timer, its size is 16 bits but if use a prescaler with it as a time extension,
+its size will be 24-bits and the prescaler represents its upper 8-bits (most siginificant).
+
+
+the enumerations used in GPTMs with all timers and wide timers:
+1) "direction" which has only 2 values: UP and DOWN to determine the timer count direction.
+2) "mode" which has only 6 values: ONE_SHOT, PERIODIC, RTC, EDGE_COUNT, EDGE_TIME, and PWM to determine the timer mode.
+3) "event" which has only 4 values: POSITIVE_EDGE, NEGATIVE_EDGE, BOTH_EDGES, and NONE to determine the required event in edge count and edge time modes.
+4) "status" which has only 2 values: DISABLED and ENABLED to decide whether an interrupt will be generated or not.
+
+I will not descripe all functions, since most of them are used by me only and you will not use them in your main, so i will only descripe the functions that you may
+use in your main.
+
+I will descripe the functions related to timers only not to wide timers since they are similar in everything except the size, so for example when I descripe the
+function timer_init(), you will understand how to initilaize a 16/32 timer using this function, but to initilaize a 32/64 wide timer you will use the same method but
+with the function wide_timer_init().
+
+very important note: for all GPTMs functions, to deal with only channel A write 'A', to deal with only channel B write 'B', but to deal with the whole timer in
+concatinated state including its 2 channels, write any char except 'A' and 'B'.
+
+very important note: timers and wide timers are numbered from 0 to 5, so make sure when you use any function that the timer_number and wide_timer_number
+is in this range.
+
+
+
+1) void timer_init(uint8_t timer_number,char channel_name, direction timer_direction, mode timer_mode, event capture_edge, status interrupt1_status, status interrupt2_status, uint8_t interrupt_priority);
+This function is used to initialize a 16/32 timer, you must use this function only one time before using the timer.
+To change the mode of any timer that was initialized before in your main, never write a second initialization without removing the old initializion,
+but you will have to overwrite the old initialization, upload the modified code to your tiva, and reset it.
+Important note: interrupt2_status represents only match interrupt in one shot or periodic modes, while interrupt1_status represents the following interrupts:
+1) timeout interrupt in one shot or periodic modes.
+2) edge count interrupt in edge count mode.
+3) edge time interrupt in edge time mode.
+
+Example 1: timer_init(1,'B',DOWN,ONE_SHOT,NONE,ENABLED,DISABLED,2) will initialize the channel B in timer 1 to work in one shot mode with down couning, here we 
+will not need an edge since this is not edge count or edge time modes, the timeout interrupt is enabled with a priority equals 2 and match interrupt is disabled. 
+
+Example 2: timer_init(0,'A',UP,EDGE_COUNT,POSITIVE_EDGE,ENABLED,DISABLED,4) will initialize the channel A in timer 0 to work in edge count mode with up counting
+and the required edge will be positive edge, the edge count interrupt is enabled with a priority equals 4.
+
+Example 3: timer_init(5,'f',UP,PERIODIC,NEGATIVE_EDGE,DISBLED,ENABLED,1) will initialize the timer 5 in concatinated state to work in periodic mode with up counting
+, since this mode is not edge count or edge time the event value should be NONE, but if you wrote another event value by mistake this will not cause a problem and will
+be ignored, the timeout interrupt is disbled while the match interrupt is enabled with a priority equals 1.
+
+Example 4: timer_init(3,'A',DOWN,EDGE_TIME,BOTH_EDGES,ENABLED,DISABLED,3) will initialize the channel A in timer 3 to work in edge time mode with down counting
+and the required edge will be both failing and rising edges, the edge time interrupt is enabled with a priority equals 3.
+
+Example 5: timer_init(4,'A',UP,RTC,NONE,DISBLED,DISABLED,4) will not lead to anything since you want to use RTC mode which runs only in concatinated state but you
+deal with only channel 'A' in timer 4, so be very careful when writting the character.
+
+Example 6: timer_init(4,'c',DOWN,RTC,BOTH_EDGES,ENABLED,ENABLED,4) will initialize the timer 4 in concatinated state to work in RTC mode and the RTC interrupt is 
+enabled with a prioity equals 4, although the direction should be UP instead of DOWN, the event value should be NONE, and the match interrupt should be disabled,
+all these mistakes will be ignored and will have no effects.
+
+Example 7: timer_init(2,'B',UP,PWM,NONE,ENABLED,DISABLED,4) will initialize the channel B in timer 2 to work in PWM mode, note that this mode runs only in down 
+counting even if you selected the count direction to be UP by mistake, although this mode has no interrupt but even if any of the 2 interrupts status are enabled 
+by mistake this will have no effect and will be ignored.
+
+To use the same functionality with wide timers (32/64), use the following function:
+void wide_timer_init(uint8_t wide_timer_number,char channel_name, direction wide_timer_direction, mode wide_timer_mode, event capture_edge, status interrupt1_status, status interrupt2_status, uint8_t interrupt_priority);
+
+
+
+
+
+
+
+2) void run_timer(uint8_t timer_number,char channel_name, uint32_t load_value, uint32_t match_value, uint8_t prescaler_value, uint8_t prescaler_match_value);
+Initilaizing a 16/32 timer through timer_init() just describes the way this timer will be running but the timer itself is still disabled, to make it run,
+use this function.
+prescaler_match_value is only used as a time extension for the match value only in individual modes, so if match value is 16-bits size without prescaler_match_value,
+its size will be 24-bits by using prescaler_match_value where prescaler_match_value will represent the upper 8-bits (most significant bits).
+
+Very important note: this function and all following function have no effect if the used timer inside it was not initialized through timer_init()
+
+Example 1: void run_timer(0,'A',0xA247,0x95FE,0xF1,0xED) will load the channel 'A' in timer 0 (only if initialized) with load value equals 0xA247 and match value
+equals 0x95FE and prescaler value equals 0xF1 and prescaler match value equals 0xED.
+
+Example 2: void run_timer(3,'m',0xBCADA247,0xAEFD95FE,0xF1,0xED) will load the timer 3 including its 2 channels (only if initialized) with load value equals 0xBCADA247
+and match value equals 0xAEFD95FE, note that any value written for prescaler value and for prescaler match value will be ignored since they are used only in
+individual modes.
+
+To use the same functionality with wide timers (32/64), use the following function:
+void run_wide_timer(uint8_t wide_timer_number,char channel_name, uint64_t load_value, uint64_t match_value, uint16_t prescaler_value, uint16_t prescaler_match_value);
+
+
+
+
+
+
+
+3)void disable_timer(uint8_t timer_number, char channel_name);
+This function is used to stop a 16/32 running timer that used timer_init() and run_timer() before.
+
+Example 1: disable_timer(2,'B') will stop the channel B in timer 2 but channel A in same timer is not affected.
+
+Example 2: disable_timer(0,'A') will stop the channel A in timer 0 but channel B in same timer is not affected.
+
+Example 3: disable_timer(5,'d') will stop the whole timer 5 inculding its 2 channels.
+
+To use the same functionality with wide timers (32/64), use the following function:
+void disable_wide_timer(uint8_t	wide_timer_number, char channel_name);
+
+
+
+
+
+
+4)void enable_timer(uint8_t timer_number, char channel_name);
+This function is used to make a stopped 16/32 timer continue running, but not to initialize it nor to make it run for first time.
+
+Example 1: enable_timer(5,'l') will force the timer 5 including its 2 channels to continue running after it was stooped by disable_timer().
+
+Example 2: enable_timer(3,'B') will force only the channel B in timer 3 to continue running after it was stooped by disable_timer().
+
+Example 3: enable_timer(2,'2') will force the timer 2 including its 2 channels to continue running after it was stooped by disable_timer().
+
+To use the same functionality with wide timers (32/64), use the following function:
+void enable_wide_timer(uint8_t	wide_timer_number, char channel_name);
+
+
+
+
+
+
+5) void wait_for_timeout(uint8_t timer_number,char channel_name);
+This function is used to poll the timeout instead of enabling the timeout interrupt in timer_init() with one shot or periodic modes for 16/32 timers.
+If you enabled the timeout interrupt in timer_init(), do not use this function.
+
+Example 1: wait_for_timeout(1,'7') will poll the timeout for the timer 1 in concatinated state (including its 2 channels).
+
+Example 2: wait_for_timeout(0,'B') will poll the timeout for only channel B in timer 0.
+
+Example 3: wait_for_timeout(4,' ') will poll the timeout for the timer 4 in concatinated state (including its 2 channels).
+
+To use the same functionality with wide timers (32/64), use the following function:
+void wait_for_wide_timeout(uint8_t wide_timer_number,char channel_name);
+
+
+
+
+
+6)void wait_for_last_edge(uint8_t timer_number,char channel_name);
+This function is used to poll the edge count instead of enabling the edge count interrupt in timer_init() with edge count mode for 16/32 timers.
+If you enabled the edge count interrupt in timer_init(), do not use this function.
+
+Example 1: wait_for_last_edge(2,'p') will poll the edge count for the timer 2 in concatinated state (including its 2 channels).
+
+Example 2: wait_for_last_edge(3,'A') will poll the edge count for only channel A in timer 3.
+
+Example 3: wait_for_last_edge(5,'B') will poll the edge count for only channel B in timer 5.
+
+To use the same functionality with wide timers (32/64), use the following function:
+void wait_for_wide_last_edge(uint8_t wide_timer_number,char channel_name);
+
+
+
+
+
+
+
+7)void wait_for_event(uint8_t	timer_number,char channel_name);
+This function is used to poll the edge time instead of enabling the edge time interrupt in timer_init() with edge time mode for 16/32 timers.
+If you enabled the edge time interrupt in timer_init(), do not use this function.
+
+Example 1: wait_for_event(2,'p') will poll the edge time for the timer 2 in concatinated state (including its 2 channels).
+
+Example 2: wait_for_event(2,'A') will poll the edge time for only channel A in timer 2.
+
+Example 3: wait_for_event(2,'B') will poll the edge time for only channel B in timer 2.
+
+To use the same functionality with wide timers (32/64), use the following function:
+void wait_for_wide_event(uint8_t wide_timer_number,char channel_name);
+
+
+ 
