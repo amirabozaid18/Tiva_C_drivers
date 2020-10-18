@@ -2030,6 +2030,80 @@ void wait_for_event(uint8_t	timer_number,char channel_name)
 }
 
 
+uint32_t detect_event_time(uint8_t	timer_number,char channel_name)
+{
+	switch (timer_number)
+	{
+		case 0:
+		{
+			switch ( channel_name)
+			{
+				case 'A': return TIMER0_TAR_R;
+				case 'B': return TIMER0_TBR_R;
+				default : return 0xFFFFFFFF;
+			}
+			
+		}
+		
+		case 1:
+		{
+			switch ( channel_name)
+			{
+				case 'A': return TIMER1_TAR_R;
+				case 'B': return TIMER1_TBR_R;
+				default : return 0xFFFFFFFF;
+			}
+			
+		}
+		
+		case 2:
+		{
+			switch ( channel_name)
+			{
+				case 'A': return TIMER2_TAR_R;
+				case 'B': return TIMER2_TBR_R;
+				default : return 0xFFFFFFFF;
+			}
+			
+		}
+		
+		case 3:
+		{
+			switch ( channel_name)
+			{
+				case 'A': return TIMER3_TAR_R;
+				case 'B': return TIMER3_TBR_R;
+				default : return 0xFFFFFFFF;
+			}
+			
+		}
+		
+		case 4:
+		{
+			switch ( channel_name)
+			{
+				case 'A': return TIMER4_TAR_R;
+				case 'B': return TIMER4_TBR_R;
+				default : return 0xFFFFFFFF;
+			}
+			
+		}
+		
+		case 5:
+		{
+			switch ( channel_name)
+			{
+				case 'A': return TIMER5_TAR_R;
+				case 'B': return TIMER5_TBR_R;
+				default : return 0xFFFFFFFF;
+			}
+			
+		}
+		default: return 0xFFFFFFFF;
+	}
+}
+
+
 
 
 // 32/64 general purpose timers
@@ -4060,4 +4134,79 @@ void wait_for_wide_event(uint8_t	wide_timer_number,char channel_name)
 		default: break;
 	}
 }
+
+
+uint32_t detect_wide_event_time(uint8_t	timer_number,char channel_name)
+{
+	switch (timer_number)
+	{
+		case 0:
+		{
+			switch ( channel_name)
+			{
+				case 'A': return WTIMER0_TAR_R;
+				case 'B': return WTIMER0_TBR_R;
+				default : return 0xFFFFFFFF;
+			}
+			
+		}
+		
+		case 1:
+		{
+			switch ( channel_name)
+			{
+				case 'A': return WTIMER1_TAR_R;
+				case 'B': return WTIMER1_TBR_R;
+				default : return 0xFFFFFFFF;
+			}
+			
+		}
+		
+		case 2:
+		{
+			switch ( channel_name)
+			{
+				case 'A': return WTIMER2_TAR_R;
+				case 'B': return WTIMER2_TBR_R;
+				default : return 0xFFFFFFFF;
+			}
+			
+		}
+		
+		case 3:
+		{
+			switch ( channel_name)
+			{
+				case 'A': return WTIMER3_TAR_R;
+				case 'B': return WTIMER3_TBR_R;
+				default : return 0xFFFFFFFF;
+			}
+			
+		}
+		
+		case 4:
+		{
+			switch ( channel_name)
+			{
+				case 'A': return WTIMER4_TAR_R;
+				case 'B': return WTIMER4_TBR_R;
+				default : return 0xFFFFFFFF;
+			}
+			
+		}
+		
+		case 5:
+		{
+			switch ( channel_name)
+			{
+				case 'A': return WTIMER5_TAR_R;
+				case 'B': return WTIMER5_TBR_R;
+				default : return 0xFFFFFFFF;
+			}
+			
+		}
+		default: return 0xFFFFFFFF;
+	}
+}
+
 
