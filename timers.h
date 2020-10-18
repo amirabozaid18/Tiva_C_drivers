@@ -39,6 +39,7 @@ void run_timer(uint8_t	timer_number,char channel_name, uint32_t load_value, uint
 void wait_for_timeout(uint8_t	timer_number,char channel_name);
 void wait_for_last_edge(uint8_t	timer_number,char channel_name);
 void wait_for_event(uint8_t	timer_number,char channel_name);
+uint32_t detect_event_time(uint8_t	timer_number,char channel_name);
 
 
 
@@ -74,6 +75,7 @@ void run_wide_timer(uint8_t	wide_timer_number,char channel_name, uint64_t load_v
 void wait_for_wide_timeout(uint8_t	wide_timer_number,char channel_name);
 void wait_for_wide_last_edge(uint8_t	wide_timer_number,char channel_name);
 void wait_for_wide_event(uint8_t	wide_timer_number,char channel_name);
+uint32_t detect_wide_event_time(uint8_t	timer_number,char channel_name);
 
 
 #endif
