@@ -223,4 +223,18 @@ To use the same functionality with wide timers (32/64), use the following functi
 void wait_for_wide_event(uint8_t wide_timer_number,char channel_name);
 
 
+
+
+
+8)uint32_t detect_event_time(uint8_t	timer_number,char channel_name);
+This function returns the value of TnR (TAR or TBR) of the 16/32 timer used in edge time mode.
+The value of TnR will be updated to be the timer counter value when exactly the event occured.
+This function will not poll the required event, it just returns the value of TnR even if the required event didn't occur.
+This function is useless if the mode is not edge time.
+This function is independent on the method you use for event(polling or interrupt).
+
+To use the same functionality with wide timers (32/64), use the following function:
+uint32_t detect_wide_event_time(uint8_t	timer_number,char channel_name);
+
+
  
