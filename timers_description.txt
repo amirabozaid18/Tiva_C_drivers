@@ -53,6 +53,9 @@ write any char except 'A' and 'B'.
 very important note: timers and wide timers are numbered from 0 to 5, so make sure when you use any
 function that the timer_number and wide_timer_number is in this range.
 
+very important note: for timers channels which have more than one CCP, I used only port F pins to save the other pins,
+for more info refer to page 707 in datasheet.
+
 
 
 1) void timer_init(uint8_t timer_number,char channel_name, direction timer_direction, mode timer_mode, event capture_edge
@@ -118,6 +121,9 @@ will represent the upper 8-bits (most significant bits).
 
 Very important note: this function and all following function have no effect if the used timer inside it was not initialized
 through timer_init()
+
+very important note: in PWM mode, duty cycle is calcualted from following equation:
+(1 - (match_value/load_value) ) * 100.
 
 Example 1: void run_timer(0,'A',0xA247,0x95FE,0xF1,0xED) will load the channel 'A' in timer 0 (only if initialized) with load value
 equals 0xA247 and match value equals 0x95FE and prescaler value equals 0xF1 and prescaler match value equals 0xED.
