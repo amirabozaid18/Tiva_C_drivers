@@ -1,0 +1,412 @@
+This file describes ADC (Analog-to-digital converter) and its funcitions.
+
+In tiva, there are 2 ADC modules: ADC0 and ADC1, each is 12-bit resolution and has 4 sample sequencers,
+for more info refer to page 799 in datasheet.
+
+There are 12 analog inputs in tiva: starting with AIN0(Analog input 0) and ending with AIN11,
+so make sure that the analog input number you use in function is in this range.
+
+the enumerations used with ADC are:
+
+1) "clock" which has only 2 values: CONNECTED and DISCONNECTED to determine which module from the 2 modules
+will be used with any analog input.
+
+2) "initiation" which has only 2 values: ONCE and ALWAYS to determine how to initiate the ADC module, ONCE is
+used to make the sequencer execute its 
+predefined sequence only for one time and then it will be disabled, but ALWAYS is used to make the sequencer
+run forever executing its predefined sequence.
+
+3) "state" which has only 2 values: ON and OFF to determine whether ADC sequencer interrupt will be generated or not. 
+
+
+
+Below is the description of all functions except initialize_analog_pin() and enable_ADC_interrupt() functions
+since you will not use them in your main, they are used only by me to reduce source code size.
+
+
+1) void ADC_pin_init(uint8_t input_number, clock ADC0_clock, clock ADC1_clock);
+
+This function must be used before any function related to ADC, it is used once to initialize any analog pin and connect
+it to one or both ADC modules, to know how to map analog input to MCU pins, refer to page 801 in datasheet.
+
+Example 1: ADC_pin_init(5,CONNECTED,DISCONNECTED) will initialize analog input 5 (PD2) and connect only ADC0 to the clock.
+
+Example 2: ADC_pin_init(8,DISCONNECTED,CONNECTED) will initialize analog input 8 (PE5) and connect only ADC1 to the clock.
+
+EXample 3: ADC_pin_init(11,DISCONNECTED,CONNECTED) will initialize analog input 11 (PB5) and connect both ADC0 and ADC1 to the clock.
+
+
+
+
+
+
+
+
+
+2) void set_sequencers_priorities(uint8_t ADC_number, uint8_t sequencer0_priority, uint8_t sequencer1_priority,
+ uint8_t sequencer2_priority, uint8_t sequencer3_priority);
+
+
+This function is used to set the priorities of the four sequecners for ADC module, the priorities determine which sequencer
+will use the ADC in case that more than one sequencer need to use the ADC module at same time, know that the 4 numbers
+must be unique, from 0 to 3, and the lower number represents the highest priority. You do not have to use this function
+if you want to use the default priorities which are 0 for sequencer 0, 1 for sequencer 1, 2 for sequencer 2, and 3 for sequencer 3.
+
+Example 1: set_sequencers_priorities(0,3,1,0,2) will make sequencer 2 with highest priority
+then sequencer 1 then sequencer 3 then sequencer 0 for ADC0.
+
+Example 2: set_sequencers_priorities(1,0,3,2,1) will make sequencer 0 with highest priority
+then sequencer 3 then sequencer 2 then sequencer 1 for ADC1.
+
+
+
+
+
+
+
+
+
+3) void sequencer0_init(uint8_t ADC_number,initiation sequencer_initiation,uint8_t samples_number,
+state sequence_interrupt, uint8_t interrupt_priority, uint8_t first_input, uint8_t second_input, uint8_t third_input, 
+uint8_t fourth_input, uint8_t fifth_input, uint8_t sixth_input, uint8_t seventh_input, uint8_t eighth_input);
+
+
+This function is used to initialize sequencer 0 of one of the 2 ADC modules, sequencer 0 can sample up to 8 analog inputs.
+
+Example 1: sequencer0_init(0,ONCE,5,ON,4,5,2,3,10,0,7,9,6) will initialize sequencer 0 for ADC0 and it will be initiated by processor
+to execute its sequence only once and it will be disabled after that, it will sample only 5 analog inputs with the following order:
+AIN5 (Analog input 5), AIN2, AIN3, AIN10, and AIN0 then it will be disabled ignoring any analog input after these 5 inputs, after
+finishing sampling AIN10, an interrupt will be generated with the priority 4.
+
+
+Example 2: sequencer0_init(1,ONCE,8,OFF,4,5,2,3,10,0,7,9,6) will initialize sequencer 0 for ADC1 and it will be initiated by processor
+to execute its sequence only once and it will be disabled after that, it will sample 8 analog inputs with the following order:
+AIN5, AIN2, AIN3, AIN10, AIN0, AIN7, AIN9 and AIN6 then it will be disabled, note that no interrupt will be generated after sampling AIN6.
+
+
+Example 3: sequencer0_init(1,ALWAYS,1,ON,2,7,50,20,80,100,200,200,200) will initialize sequencer 0 for ADC1 and it will run forever
+until you disable it executing its sequence, it will sample only AIN7, an interrupt will be generated with the priority 2 periodically
+once the sampling of AIN7 is done. Note that the numbers used after 7 is out of range for analog inputs(0-11),but 
+this never mind because they will be ignored since samples number is 1.
+
+
+Example 4: sequencer0_init(0,ALWAYS,4,OFF,2,11,5,2,8,10,4,9,6) will initialize sequencer 0 for ADC0 and it will run forever
+until you disable it executing its sequence, it will sample only 4 analog inputs with the following order:
+AIN11, AIN5, AIN2 and AIN8 then it will repeat this sequence again and again ignoring any number after
+these 4 numbers, note that no interrupt will be generated  after sampling AIN8.
+
+
+
+
+
+
+
+
+
+
+
+4) void sequencer1_init(uint8_t ADC_number,initiation sequencer_initiation,uint8_t samples_number, state sequence_interrupt,
+uint8_t interrupt_priority, uint8_t first_input, uint8_t second_input, uint8_t third_input, uint8_t fourth_input);
+
+
+This function is used to initialize sequencer 1 of one of the 2 ADC modules, sequencer 1 can sample up to 4 analog inputs.
+
+Example 1: sequencer1_init(1,ONCE,2,ON,0,5,2,7,4) will initialize sequencer 1 for ADC1 and it will be initiated by processor
+to execute its sequence only once and it will be disabled after that, it will sample only 2 analog inputs with the following order:
+AIN5 (Analog input 5) and AIN2 then it will be disabled ignoring any analog input after these 2 inputs, after finishing
+sampling AIN2, an interrupt will be generated with the priority 0.
+
+
+Example 2: sequencer1_init(0,ONCE,4,OFF,3,7,4,6,2) will initialize sequencer 1 for ADC0 and it will be initiated by processor
+to execute its sequence only once and it will be disabled after that, it will sample 4 analog inputs with the following order:
+AIN7, AIN4, AIN6, and AIN2 then it will be disabled, note that no interrupt will be generated after sampling AIN2.
+
+
+Example 3: sequencer1_init(1,ALWAYS,0,ON,2,7,5,9,8) is useless since samples number must be between 1 and 4 for sequencer 1.
+
+
+Example 4: sequencer1_init(0,ALWAYS,1,ON,2,10,3,4,6) will initialize sequencer 1 for ADC0 and it will run forever until you disable it
+executing its sequence, it will sample only AIN10, an interrupt will be generated with the priority 2 periodically once the sampling is done.
+
+
+
+
+
+
+
+
+
+
+
+
+
+5) void sequencer2_init(uint8_t ADC_number,initiation sequencer_initiation,uint8_t samples_number, state sequence_interrupt,
+uint8_t interrupt_priority, uint8_t first_input, uint8_t second_input, uint8_t third_input, uint8_t fourth_input);
+
+
+This function is used to initialize sequencer 2 of one of the 2 ADC modules, sequencer 2 can sample up to 4 analog inputs.
+
+Example 1: sequencer1_init(1,ONCE,2,ON,0,5,2,7,4) will initialize sequencer 2 for ADC1 and it will be initiated by processor
+to execute its sequence only once and it will be disabled after that, it will sample only 2 analog inputs with the following order:
+AIN5 (Analog input 5) and AIN2 then it will be disabled ignoring any analog input after these 2 inputs, after finishing
+sampling AIN2, an interrupt will be generated with the priority 0.
+
+
+Example 2: sequencer1_init(0,ONCE,4,OFF,3,7,4,6,2) will initialize sequencer 2 for ADC0 and it will be initiated by processor
+to execute its sequence only once and it will be disabled after that, it will sample 4 analog inputs with the following order:
+AIN7, AIN4, AIN6, and AIN2 then it will be disabled, note that no interrupt will be generated  after sampling AIN2.
+
+
+Example 3: sequencer1_init(1,ALWAYS,0,ON,2,7,5,9,8) is useless since samples number must be between 1 and 4 for sequencer 2.
+
+
+Example 4: sequencer1_init(0,ALWAYS,1,ON,2,10,3,4,6) will initialize sequencer 2 for ADC0 and it will run forever until you disable it
+executing its sequence, it will sample only AIN10, an interrupt will be generated with the priority 2 periodically once the sampling is done.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+6) void sequencer3_init(uint8_t ADC_number,initiation sequencer_initiation, state sequence_interrupt,
+uint8_t interrupt_priority, uint8_t sequencer_input);
+
+This function is used to initialize sequencer 3 of one of the 2 ADC modules, sequencer 3 can sample only one analog input.
+
+Example 1: sequencer3_init(0,ONCE,ON,4,5) will initialize sequencer 3 for ADC0 and it will be initiated by processor to
+sample AI5 once,then it will be disabled, after finishing sampling AI5, an interrupt will be generated with priotiy 4.
+
+Example 2: sequencer3_init(1,ONCE,OFF,0,10) will initialize sequencer 3 for ADC1 and it will be initiated by processor
+to sample AI10 once, then it will be disabled, note that no interrupt will be generated  after sampling AIN10.
+
+Example 1: sequencer3_init(0,ALWAYS,ON,2,6) will initialize sequencer 3 for ADC0 and it will sample AIN6 forever until you
+disable it, an interrupt will be generated with the priority 2 periodically once the sampling is done.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7) void run_sequencer(uint8_t ADC_number,uint8_t sequencer_number);
+
+This function is used to make the processor initiate the sequencer, it's used with ONCE initiation and it's useless when
+used with ALWAYS initiation, it's used to make sequencer run for first time or after it's disabled.
+
+Example 1: run_sequencer(0,3) will make the processor initiate sequencer 3 for ADC0.
+
+Example 2: run_sequencer(1,5) is useless since sequencers numbers are only from 0 to 3.
+
+Example 3: run_sequencer(1,0) will make the processor initiate sequencer 0 for ADC1.
+
+
+
+
+
+
+
+
+
+
+
+
+
+8) uint16_t conversion_result(uint8_t ADC_number, uint8_t sequencer_number);
+
+This function return the conversion result stored in the sequencer FIFO which is 12 bits.
+
+Example 1: conversion_result(0,0) will return the value stored in the FIFO of sequencer 0 of ADC0 representing the result of conversion.
+
+Example 2: conversion_result(1,3) will return the value stored in the FIFO of sequencer 3 of ADC1 representing the result of conversion.
+
+Example 3: conversion_result(0,2) will return the value stored in the FIFO of sequencer 2 of ADC0 representing the result of conversion.
+
+
+
+
+
+
+
+
+
+
+
+9) uint8_t is_FIFO_full(uint8_t ADC_number, uint8_t sequencer_number);
+
+This function return 1 if FIFO of the sequencer in ADC module is full, 0 if not full, and 0xFF if your arguments are invalid
+
+Example 1: is_FIFO_full(2,0) will return 0xFF since ADC_number must be either 0 or 1.
+
+Example 1: is_FIFO_full(1,3) will return 1 if FIFO of sequencer 3 of ADC1 is full or 0 if it's not full.
+
+
+
+
+
+
+
+
+
+
+
+
+10) uint8_t is_FIFO_empty(uint8_t ADC_number, uint8_t sequencer_number);
+
+This function return 1 if FIFO of the sequencer in ADC module is empty, 0 if not empty, and 0xFF if your arguments are invalid
+
+Example 1: is_FIFO_full(0,4) will return 0xFF since sequencer_number must be from 0 to 3.
+
+Example 1: is_FIFO_full(0,2) will return 1 if FIFO of sequencer 2 of ADC0 is empty or 0 if it's not full.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11) uint8_t next_entry_to_be_read(uint8_t ADC_number, uint8_t sequencer_number);
+
+This function is used in software debugging to know which entry in the FIFO of the sequencer in ADC module will be read,
+it returns numbers between 0-7 for sequencer 0, between 0-3 for sequencer 1, between 0-3 for sequencer 2, and 0 for
+sequencer 3 only if your arguments  are valid and returns 0xFF if your arguments are invalid.
+
+Example 1: next_entry_to_be_read(1,0) will return the index of the entry that is about to be read in FIFO of sequencer 0 in ADC1.
+
+Example 2: next_entry_to_be_read(0,5) will return 0xFF since sequencer_number must be from 0 to 3.
+
+
+
+
+
+
+
+
+
+
+12) uint8_t next_entry_to_be_written(uint8_t ADC_number, uint8_t sequencer_number);
+
+This function is used in software debugging to know which entry in the FIFO of the sequencer in ADC module will be written,
+it returns numbers between 0-7 for sequencer 0, between 0-3 for sequencer 1, between 0-3 for sequencer 2, and 0 for
+sequencer 3 only if your arguments are valid and returns 0xFF if your arguments are invalid.
+
+Example 1: next_entry_to_be_written(0,2) will return the index of the entry that is about to be written in FIFO of sequencer 2 in ADC0.
+
+Example 2: next_entry_to_be_written(1,10) will return 0xFF since sequencer_number must be from 0 to 3.
+
+
+
+
+13) void synchronize_ADC_modules(uint8_t first_module_sequecner_number, uint8_t first_module_lag_multiplier,
+uint8_t second_module_sequecner_number, uint8_t second_module_lag_multiplier);
+
+This function is used to make the 2 ADC modules start running at the same time with different delay for each one, it's
+useful in case you want to double the sampling rate for the same input as explained in example 1 below, you
+can also use it for different analog inputs in the 2 modules.
+
+Important note: This function work only with ONCE initiation and lag_multiplier must be from 0 to 15 since max delay = 15*22.5 = 337.5 degrees.
+
+Very important note: this function is useless unless you initialized the sequencers.
+
+Example 1: synchronize_ADC_modules(0,0,2,8) will make sequencer 0 of ADC0 run with no delay but sequencer 2 of ADC1 will run after a delay equal 
+(8*22.5=180) degrees, so if both sequencers samples the same input, the sampling rate will be doubled.
+
+Example 2: synchronize_ADC_modules(1,4,3,2) will make sequencer 1 of ADC0 run after a delay equal 
+(4*22.5=90) degrees but sequencer 3 of ADC1 will run after a delay equal (2*22.5=45) degrees.
+
+
+
+
+
+
+
+
+
+
+14) void set_differntial_pair(uint8_t ADC_number, uint8_t sequencer_number, uint8_t positive_sample_index,uint8_t negative_sample_index);
+
+
+This function is used after initializing the sequencer only if you want differential analog inputs, if you do not use this
+function, the analog input will be single-ended(default) for more info about differential analog inputs refer to page 810 in datasheet.
+
+Example 1: set_differntial_pair(0,1,1,3) will define the second sample (whose index = 1) in sequencer 1 in ADC0 as the positive input and 
+the fourth sample (whose index = 3) in sequencer 1 in ADC0 as the negative input, the result of this conversion can be found in both entries 
+1 and 3 in FIFO of sequencer 1 in ADC0 using conversion_result(0,1).
+
+
+Example 2: set_differntial_pair(1,0,3,0) will define the fourth sample (whose index = 3) in sequencer 0 in ADC1 as the positive input and 
+the first sample (whose index = 0) in sequencer 0 in ADC1 as the negative input, the result of this conversion can be found in both entries 
+3 and 0 in FIFO of sequencer 0 in ADC1 using conversion_result(1,0).
+
+
+
+
+
+
+
+
+
+
+
+
+
+15) uint8_t is_ADC_busy(uint8_t ADC_number);
+
+This function is used to poll the ADC, it returns 1 if it's busy, 0 if not(idle), or 0xFF if your argument is invalid.
+
+Example 1: is_ADC_busy(3) will return 0xFF since ADC_number must be either 0 or 1.
+
+Example 2: is_ADC_busy(0) will return 1 if ADC0 is busy or 0 if it is not(idle).
+
+
+
+
+
+
+
+
+
+
+
+16) void set_averaging_rate(uint8_t ADC_number,uint8_t average_rate);
+
+This function is used if you want to get more accurate conversion result but the throughput will be decreased by the average rate, for
+more info refer to page 807 in datasheet.
+
+Important note: the average rate has 7 discrete values: 1(useless and the throughput will be the same before using this function), 2, 4,
+8, 16, 32, and 64.
+
+Example 1: set_averaging_rate(0,8) will accumulate each 8 samples in ADC0 and average them.
+
+Example 2: set_averaging_rate(1,32) will accumulate each 32 samples in ADC1 and average them. 
+
+
+
+Some tips:
+1- do not connect the clock to any ADC module that you will not use to save power.
+2- do not use ALWAYS initiation with more than one of the eight sequencers, and it is preferred to make this sequencer samples only
+one input to extract the result easily from its FIFO.
+3- do not use is_ADC_busy(ADC_number) with ALWAYS initiation since it will always return 1(if ADC_number is valid).
