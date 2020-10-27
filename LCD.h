@@ -11,10 +11,9 @@ void LCD_command(uint8_t command);
 void LCD_char(uint8_t mychar);
 void LCD_display_string(char* mystring);
 void LCD_display_number(int64_t mynumber);
-
-
-
-uint64_t power(uint32_t base, uint8_t exponent);
+void LCD_go_to_first_line(void);
+void LCD_go_to_second_line(void);
+void LCD_clear_screen(void);
 
 
 #endif
