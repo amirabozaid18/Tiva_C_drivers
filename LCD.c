@@ -43,7 +43,7 @@ void LCD_init(uint8_t lines_number, char data_port_name, char control_port_name,
 			LCD_command(0x28);											//2 lines 4-bits mode		
 
 	LCD_command(0x06);													//entry mode		
-	LCD_command(0x80)	;												//move cursor to beginning of first line	
+	LCD_command(0x80)	;													//move cursor to beginning of first line	
 	LCD_command(0x0E);													//Display on cursor on	
 	
 }
@@ -63,7 +63,7 @@ void LCD_command(uint8_t command)
 			delayMs(3);
 		else																										// any other command
 			delayUs(60);
-		set_output_pin(CONTROL_PORT_DATA_R,E_PIN);						// ready for next command or data to be sent
+		set_output_pin(CONTROL_PORT_DATA_R,E_PIN);							// ready for next command or data to be sent
 	}
 
 
@@ -77,10 +77,10 @@ void LCD_command(uint8_t command)
 			delayMs(3);
 		else																										// any other command
 			delayUs(60);
-		set_output_pin(CONTROL_PORT_DATA_R,E_PIN);						// ready for next command or data to be sent
+		set_output_pin(CONTROL_PORT_DATA_R,E_PIN);							// ready for next command or data to be sent
 		
 		
-		set_half_port(DATA_PORT_DATA_R,UPPER, command );					// send the lower half of command
+		set_half_port(DATA_PORT_DATA_R,UPPER, command );				// send the lower half of command
 		clear_output_pin(CONTROL_PORT_DATA_R,RS_PIN);						// send a command
 		clear_output_pin(CONTROL_PORT_DATA_R,RW_PIN);						//write to LCD
 		clear_output_pin(CONTROL_PORT_DATA_R,E_PIN);						// send a higt-to-low pulse on enable pin
@@ -88,7 +88,7 @@ void LCD_command(uint8_t command)
 			delayMs(3);
 		else																										// any other command
 			delayUs(60);
-		set_output_pin(CONTROL_PORT_DATA_R,E_PIN);						// ready for next command or data to be sent
+		set_output_pin(CONTROL_PORT_DATA_R,E_PIN);							// ready for next command or data to be sent
 	}
 
 	
@@ -105,7 +105,7 @@ void LCD_char(uint8_t mychar)
 		clear_output_pin(CONTROL_PORT_DATA_R,RW_PIN);						//write to LCD
 		clear_output_pin(CONTROL_PORT_DATA_R,E_PIN);						// send a higt-to-low pulse on enable pin
 		delayUs(60);
-		set_output_pin(CONTROL_PORT_DATA_R,E_PIN);						// ready for next command or data to be sent
+		set_output_pin(CONTROL_PORT_DATA_R,E_PIN);							// ready for next command or data to be sent
 	}
 		
 		
@@ -117,7 +117,7 @@ void LCD_char(uint8_t mychar)
 		clear_output_pin(CONTROL_PORT_DATA_R,RW_PIN);						//write to LCD
 		clear_output_pin(CONTROL_PORT_DATA_R,E_PIN);						// send a higt-to-low pulse on enable pin
 		delayUs(60);
-		set_output_pin(CONTROL_PORT_DATA_R,E_PIN);						// ready for next command or data to be sent
+		set_output_pin(CONTROL_PORT_DATA_R,E_PIN);							// ready for next command or data to be sent
 
 		
 		set_half_port(DATA_PORT_DATA_R,UPPER,mychar);						// send the lower half of data
@@ -125,7 +125,7 @@ void LCD_char(uint8_t mychar)
 		clear_output_pin(CONTROL_PORT_DATA_R,RW_PIN);						//write to LCD
 		clear_output_pin(CONTROL_PORT_DATA_R,E_PIN);						// send a higt-to-low pulse on enable pin
 		delayUs(60);
-		set_output_pin(CONTROL_PORT_DATA_R,E_PIN);						// ready for next command or data to be sent
+		set_output_pin(CONTROL_PORT_DATA_R,E_PIN);							// ready for next command or data to be sent
 	}
 
 	
@@ -134,12 +134,12 @@ void LCD_char(uint8_t mychar)
 void LCD_display_string(char* mystring)
 {
 	uint8_t	display_position = 0;
-	LCD_command(0x01);																									//clear screen
+	//LCD_command(0x01);																									//clear screen
 	while(*(mystring))
 	{
 		LCD_char( *(mystring++) );
 		display_position++;
-		if ( (!(display_position %32))	&& 	LINES_NUMBER	== 2)				// 2 lines are full
+		if ( (!(display_position %32))	&& 	LINES_NUMBER	== 2)					// 2 lines are full
 		{
 			display_position = 0;
 			delayMs(3000);
@@ -216,19 +216,18 @@ void LCD_display_number(int64_t mynumber)
 }
 
 
-uint64_t power(uint32_t base, uint8_t exponent)
+void LCD_go_to_first_line(void)
 {
-	uint64_t result =1;
-	uint8_t k;
-	if (exponent == 0)
-			return 1;
-	
-	else
-	{
-		for (k=1;k<=exponent;k++)
-			result *= base;
-	}
-	
-	return result;
+	LCD_command(0x80);																						//move cursor to beginning of first line
 }
 
+
+void LCD_go_to_second_line(void)
+{
+	LCD_command(0xC0);																					//move cursor to beginning of second line
+}
+
+void LCD_clear_screen(void)
+{
+	LCD_command(0x01);																									//clear screen
+}
