@@ -222,12 +222,48 @@ Example 3: run_sequencer(1,0) will make the processor initiate sequencer 0 for A
 
 
 
+8) void disable_sequencer(uint8_t ADC_number,uint8_t sequencer_number);
+
+This function is used to disable one of the sequencers in any of the 2 modules whether this sequencer is currently working or not.
+
+Example 1: disable_sequencer(0,2) will disable sequencer 2 for ADC0.
+
+Example 2: disable_sequencer(1,1) will disable sequencer 1 for ADC1.
+
+Example 3: disable_sequencer(1,3) will disable sequencer 3 for ADC0.
 
 
 
 
 
-8) uint16_t conversion_result(uint8_t ADC_number, uint8_t sequencer_number);
+
+
+
+
+
+9) void enable_sequencer(uint8_t ADC_number,uint8_t sequencer_number);
+
+This function is not used to make the sequencer work for first time but it's used to make it resume working after it was disabled.
+
+Example 1: enable_sequencer(1,2) will make sequencer 2 for ADC1 resume working after it was disabled by disable_sequencer(1,2).
+
+Example 2: enable_sequencer(0,3) will make sequencer 3 for ADC0 resume working after it was disabled by disable_sequencer(0,3).
+
+Example 3: enable_sequencer(1,0) will make sequencer 0 for ADC1 resume working after it was disabled by disable_sequencer(1,0).
+
+
+
+
+
+
+
+
+
+
+
+
+
+10) uint16_t conversion_result(uint8_t ADC_number, uint8_t sequencer_number);
 
 This function return the conversion result stored in the sequencer FIFO which is 12 bits.
 
@@ -247,7 +283,7 @@ Example 3: conversion_result(0,2) will return the value stored in the FIFO of se
 
 
 
-9) uint8_t is_FIFO_full(uint8_t ADC_number, uint8_t sequencer_number);
+11) uint8_t is_FIFO_full(uint8_t ADC_number, uint8_t sequencer_number);
 
 This function return 1 if FIFO of the sequencer in ADC module is full, 0 if not full, and 0xFF if your arguments are invalid
 
@@ -266,7 +302,7 @@ Example 1: is_FIFO_full(1,3) will return 1 if FIFO of sequencer 3 of ADC1 is ful
 
 
 
-10) uint8_t is_FIFO_empty(uint8_t ADC_number, uint8_t sequencer_number);
+12) uint8_t is_FIFO_empty(uint8_t ADC_number, uint8_t sequencer_number);
 
 This function return 1 if FIFO of the sequencer in ADC module is empty, 0 if not empty, and 0xFF if your arguments are invalid
 
@@ -288,7 +324,7 @@ Example 1: is_FIFO_full(0,2) will return 1 if FIFO of sequencer 2 of ADC0 is emp
 
 
 
-11) uint8_t next_entry_to_be_read(uint8_t ADC_number, uint8_t sequencer_number);
+13) uint8_t next_entry_to_be_read(uint8_t ADC_number, uint8_t sequencer_number);
 
 This function is used in software debugging to know which entry in the FIFO of the sequencer in ADC module will be read,
 it returns numbers between 0-7 for sequencer 0, between 0-3 for sequencer 1, between 0-3 for sequencer 2, and 0 for
@@ -307,7 +343,7 @@ Example 2: next_entry_to_be_read(0,5) will return 0xFF since sequencer_number mu
 
 
 
-12) uint8_t next_entry_to_be_written(uint8_t ADC_number, uint8_t sequencer_number);
+14) uint8_t next_entry_to_be_written(uint8_t ADC_number, uint8_t sequencer_number);
 
 This function is used in software debugging to know which entry in the FIFO of the sequencer in ADC module will be written,
 it returns numbers between 0-7 for sequencer 0, between 0-3 for sequencer 1, between 0-3 for sequencer 2, and 0 for
@@ -320,7 +356,7 @@ Example 2: next_entry_to_be_written(1,10) will return 0xFF since sequencer_numbe
 
 
 
-13) void synchronize_ADC_modules(uint8_t first_module_sequecner_number, uint8_t first_module_lag_multiplier,
+15) void synchronize_ADC_modules(uint8_t first_module_sequecner_number, uint8_t first_module_lag_multiplier,
 uint8_t second_module_sequecner_number, uint8_t second_module_lag_multiplier);
 
 This function is used to make the 2 ADC modules start running at the same time with different delay for each one, it's
@@ -346,7 +382,7 @@ Example 2: synchronize_ADC_modules(1,4,3,2) will make sequencer 1 of ADC0 run af
 
 
 
-14) void set_differntial_pair(uint8_t ADC_number, uint8_t sequencer_number, uint8_t positive_sample_index,uint8_t negative_sample_index);
+16) void set_differntial_pair(uint8_t ADC_number, uint8_t sequencer_number, uint8_t positive_sample_index,uint8_t negative_sample_index);
 
 
 This function is used after initializing the sequencer only if you want differential analog inputs, if you do not use this
@@ -373,7 +409,7 @@ the first sample (whose index = 0) in sequencer 0 in ADC1 as the negative input,
 
 
 
-15) uint8_t is_ADC_busy(uint8_t ADC_number);
+17) uint8_t is_ADC_busy(uint8_t ADC_number);
 
 This function is used to poll the ADC, it returns 1 if it's busy, 0 if not(idle), or 0xFF if your argument is invalid.
 
@@ -391,7 +427,7 @@ Example 2: is_ADC_busy(0) will return 1 if ADC0 is busy or 0 if it is not(idle).
 
 
 
-16) void set_averaging_rate(uint8_t ADC_number,uint8_t average_rate);
+18) void set_averaging_rate(uint8_t ADC_number,uint8_t average_rate);
 
 This function is used if you want to get more accurate conversion result but the throughput will be decreased by the average rate, for
 more info refer to page 807 in datasheet.
