@@ -1,0 +1,433 @@
+This file describes the UART(Universal asynchronous receiver transmitter) module and all functions related to it.
+
+Any UART module consist of 3 wires: receiver(Rx), transmitter(Tx) and ground, so for any UART module there are 2 pins which must
+be defined as Rx and Tx not GPIOs, do not worry about definning the pins for any UART module, I do this mission but I mentioned it
+just to know how UART works. To know the pins related to each UART module, refer to page 895 in datasheet.
+
+I used only PB0 for Rx and only PR1 for Tx in UART1 to save pins.
+
+There are 8 UART modules in Tiva c starting from UART0 to UART7, the most common used is UART0 whose pins(A0 and A1) are defined
+by default as a UART Rx and Tx not GPIOs.
+
+
+
+the enumberations used for UART:
+1) "speed" which has only 2 values: NORMAL and HIGH to determine whether the UART will be clocked with a normal frequency
+or a high frequency.
+
+2) "length" which has only 4 values: FIVE, SIX, SEVEN, and EIGHT to determine the word length while sending data using UART.
+
+3) "usage" which has only 2 values: USED and UNUSED to determine whether a specific feature in UART will be used or not.
+
+4) "sort" which has only 2 values: EVEN and ODD to determine if the parity check while receiving data by UART will be even or odd.
+
+5) "status" which has only 2 values: ENABLED and DISABLED to detemine whether a specific interrupt in UART will be used or not.
+
+
+
+the functions used for UART:
+
+1) void UART_init(uint8_t UART_number);
+
+This function must be used before any other function related to UART to initialize any UART module.
+
+Example 1: UART_init(0) will initialize UART0 module.
+
+Example 2: UART_init(7) will initialize UART7 module.
+
+
+
+
+
+
+
+
+
+
+
+2) void set_Baud_rate(uint8_t UART_number,uint32_t Baud_Rate, uint32_t system_clock, speed UART_clock_frequency);
+
+This function must be used after UART_init() only and before any other function related to UART.
+
+Example 1: set_Baud_rate(3,9600,16000000,NORMAL) will set the baud rate for UART3 whose clock is NORMAL and the system clock
+is 16MHZ as 9600 bits/s.
+
+Example 2: set_Baud_rate(5,115200,8000000,HIGH) will set the baud rate for UART5 whose clock is HIGH and the system clock
+is 8MHZ as 115200 bits/s.
+
+
+
+
+
+
+
+
+
+3) void configure_UART(uint8_t UART_number, length data_length, usage two_stop_bits, usage parity_check, sort parity_sort);
+
+This function must be used after UART_init() and set_Baud_rate() and before any other function related to UART.
+
+Example 1: configure_UART(2,EIGHT,USED,UNUSED,ODD) will configure UART2 as following: word length is 8 bits, 2 stop bits
+are used, and no parity check.
+Note that the fifth argument is ignored if the parity check is unused.
+
+Example 2: configure_UART(4,FIVE,UNUSED,USED,ODD) will configure UART4 as following: word length is 5 bits, only one stop bit
+is used, and parity check is odd.
+
+
+
+
+
+
+
+
+
+
+
+
+
+4) void set_UART_interrupts(uint8_t UART_number, status reception_interrupt, status transmission_interrupt,
+ status frame_error_interrupt , status parity_error_interrupt, status break_error_interrupt,
+ status overrun_error_interrupt, uint8_t interrupt_priority);
+
+
+This function must be used after UART_init(), set_Baud_rate(), and configure_UART() and before any other function related to UART.
+
+Example 1: set_UART_interrupts(1,USED,UNUSED,USED,UNUSED,USED,UNUSED,1) will make the program jump to the
+UART1 handler(service routine) whose priority is 1 in any of the following cases:
+a- the data stored in the receiver FIFO occupies FIFO_size/8 or higher.
+b- a frame error occured while receiving data.
+c- a break error occured while receiving data.
+
+Example 2: set_UART_interrupts(3,UNUSED,USED,UNUSED,UNUSED,UNUSED,UNUSED,2) will make the program jump to the
+UART3 handler(service routine) whose priority is 2 only if the transimitter FIFO is full.
+
+
+Example 3: set_UART_interrupts(6,USED,UNUSED,UNUSED,UNUSED,UNUSED,UNUSED,4) will make the program jump to the
+UART6 handler(service routine) whose priority is 4 only if the data stored in the receiver FIFO occupies FIFO_size/8 or higher.
+
+
+Very important: there is only one handler for any UART module not a specific handler for each interrupt in any module, so if
+you enable multiple interrupts in the same UART you must check each one state in MIS register once you entered the UART module handler.
+
+
+
+
+
+
+
+
+
+
+
+
+5) void run_UART(uint8_t UART_number);
+
+The previous four functions are just used to define the way the UART module will work, but it didn't start working, so to make
+it work for the first time, you must use this function.
+This function can also be used after disabling UART module by disable_UART() to make it resume working.
+
+Example 1: run_UART(4) will make UART4 start/resume working.
+
+Example 2: run_UART(2) will make UART2 start/resume working.
+
+Example 3: run_UART(8) has no effect since UART number must be between 0 and 7.
+
+
+
+
+
+
+
+
+
+6) void disable_UART(uint8_t UART_number);
+
+This function is used to make UART module stop working.
+
+Example 1: disable_UART(3) will make UART3 stop working.
+
+Example 2: disable_UART(0) will make UART0 stop working.
+
+
+
+
+
+
+
+
+
+
+
+7)void UART_send_char(uint8_t UART_number, uint8_t mydata);
+
+This function is used to send a single character by UART module.
+
+Example 1: UART_send_char(0,'a') will send the cahracter 'a' through UART0.
+
+Example 2: UART_send_char(4,'m') will send the cahracter 'm' through UART4.
+
+
+
+
+
+
+
+
+
+
+
+
+8) void UART_send_string(uint8_t UART_number, char* mystring);
+
+This function is used to send a string of any number of characters by UART module.
+
+Example 1: UART_send_string(3,"welcome to my drivers") will send the string "welcome to my drivers" through UART3.
+
+Example 2: UART_send_string(7,"Kind regards\n see you soon") will send the string "Kind regards\n see you soon" through UART7.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+9) void UART_send_number(uint8_t UART_number,int64_t mynumber);
+
+This function is used to send an integer number (positive, negative, or zero) whose size is up to 64 bits through UART module.
+
+Example 1: UART_send_number(2,-951478236) will send the number -951478236 through UART2.
+
+Example 2: UART_send_number(0,75632951478236) will send the number 75632951478236 through UART0.
+
+Example 3: UART_send_number(4,0) will send the number 0 through UART4.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+10) uint8_t UART_receive(uint8_t UART_number);
+
+This function is used to return the data (without its status) received by UART module.
+
+Example 1: UART_receive(3) will return the data received by UART3.
+
+Example 2: UART_receive(5) will return the data received by UART5.
+
+
+
+
+
+
+
+
+
+
+
+
+11) uint8_t is_overrun_error(uint8_t UART_number);
+
+This function is used to check overrun error occurance with the last data received, it returns one of 3 values not only 2:
+a- 1 if overrun error occured with the last received data only if your argument is valid.
+b- 0 if overrun error did not occur with the last received data only if your argument is valid.
+c- 0xFF if your argument is invalid.
+
+
+Example 1: is_overrun_error(0) will return 1 if overrun error occured with last data received by UART0 or
+0 if this error did not occur with the last data received by UART0.
+
+Example 2: is_overrun_error(9) will return 0xFF since UART_number must be between 0 and 7.
+
+
+
+
+
+
+
+
+
+
+
+
+
+12) uint8_t is_break_error(uint8_t UART_number);
+
+This function is used to check break error occurance with the last data received, it returns one of 3 values not only 2:
+a- 1 if break error occured with the last received data only if your argument is valid.
+b- 0 if break error did not occur with the last received data only if your argument is valid.
+c- 0xFF if your argument is invalid.
+
+
+Example 1: is_break_error(4) will return 1 if break error occured with last data received by UART4 or
+0 if this error did not occur with the last data received by UART4.
+
+Example 2: is_break_error(40) will return 0xFF since UART_number must be between 0 and 7.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+13) uint8_t is_parity_error(uint8_t UART_number);
+
+This function is used to check parity error occurance with the last data received, it returns one of 3 values not only 2:
+a- 1 if parity error occured with the last received data only if your argument is valid.
+b- 0 if parity error did not occur with the last received data only if your argument is valid.
+c- 0xFF if your argument is invalid.
+
+
+Example 1: is_parity_error(2) will return 1 if parity error occured with last data received by UART2 or
+0 if this error did not occur with the last data received by UART2.
+
+Example 2: is_parity_error(20) will return 0xFF since UART_number must be between 0 and 7.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+14) uint8_t is_framing_error(uint8_t UART_number);
+
+This function is used to check framing error occurance with the last data received, it returns one of 3 values not only 2:
+a- 1 if framing error occured with the last received data only if your argument is valid.
+b- 0 if framing error did not occur with the last received data only if your argument is valid.
+c- 0xFF if your argument is invalid.
+
+
+Example 1: is_framing_error(6) will return 1 if framing error occured with last data received by UART6 or
+0 if this error did not occur with the last data received by UART6.
+
+Example 2: is_framing_error(10) will return 0xFF since UART_number must be between 0 and 7.
+
+
+
+
+
+
+
+
+
+
+
+
+15) uint8_t is_receiver_FIFO_full(uint8_t UART_number);
+
+This function is used to check if the FIFO of receiver in the UART module is full or not, it returns one of 3 values not only 2:
+a- 1 if the FIFO of receiver in UART module is full only if your argument is valid.
+b- 0 if the FIFO of receiver in UART module is not full only if your argument is valid.
+c- 0xFF if your argument is invalid.
+
+Example 1: is_receiver_FIFO_full(3) will return 1 if the FIFO of receiver in UART3 is full or 0 if it's not full.
+
+Example 2: is_receiver_FIFO_full(12) will return 0xFF since UART_number must be between 0 and 7.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+16) uint8_t is_receiver_FIFO_empty(uint8_t UART_number);
+
+This function is used to check if the FIFO of receiver in the UART module is empty or not, it returns one of 3 values not only 2:
+a- 1 if the FIFO of receiver in UART module is empty only if your argument is valid.
+b- 0 if the FIFO of receiver in UART module is not empty only if your argument is valid.
+c- 0xFF if your argument is invalid.
+
+Example 1: is_receiver_FIFO_empty(2) will return 1 if the FIFO of receiver in UART2 is empty or 0 if it's not empty.
+
+Example 2: is_receiver_FIFO_empty(14) will return 0xFF since UART_number must be between 0 and 7.
+
+
+
+
+
+
+
+
+
+
+
+
+
+17) uint8_t is_transmitter_FIFO_full(uint8_t UART_number);
+
+This function is used to check if the FIFO of transmitter in the UART module is full or not, it returns one of 3 values not only 2:
+a- 1 if the FIFO of transmitter in UART module is full only if your argument is valid.
+b- 0 if the FIFO of transmitter in UART module is not full only if your argument is valid.
+c- 0xFF if your argument is invalid.
+
+Example 1: is_transmitter_FIFO_full(6) will return 1 if the FIFO of transmitter in UART6 is full or 0 if it's not full.
+
+Example 2: is_transmitter_FIFO_full(120) will return 0xFF since UART_number must be between 0 and 7.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+18) uint8_t is_transmitter_FIFO_empty(uint8_t UART_number);
+
+This function is used to check if the FIFO of transmitter in the UART module is empty or not, it returns one of 3 values not only 2:
+a- 1 if the FIFO of transmitter in UART module is empty only if your argument is valid.
+b- 0 if the FIFO of transmitter in UART module is not empty only if your argument is valid.
+c- 0xFF if your argument is invalid.
+
+Example 1: is_transmitter_FIFO_empty(5) will return 1 if the FIFO of transmitter in UART5 is empty or 0 if it's not empty.
+
+Example 2: is_transmitter_FIFO_empty(16) will return 0xFF since UART_number must be between 0 and 7.
+
+
