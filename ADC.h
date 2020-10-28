@@ -19,6 +19,7 @@ void sequencer1_init(uint8_t ADC_number,initiation sequencer_initiation,uint8_t 
 void sequencer2_init(uint8_t ADC_number,initiation sequencer_initiation,uint8_t samples_number, state sequence_interrupt, uint8_t interrupt_priority, uint8_t first_input, uint8_t second_input, uint8_t third_input, uint8_t fourth_input);
 void sequencer3_init(uint8_t ADC_number,initiation sequencer_initiation, state sequence_interrupt, uint8_t interrupt_priority, uint8_t sequencer_input);
 void run_sequencer(uint8_t ADC_number,uint8_t sequencer_number);
+void disable_sequencer(uint8_t ADC_number,uint8_t sequencer_number);
 uint16_t conversion_result(uint8_t ADC_number, uint8_t sequencer_number);
 uint8_t is_FIFO_full(uint8_t ADC_number, uint8_t sequencer_number);
 uint8_t is_FIFO_empty(uint8_t ADC_number, uint8_t sequencer_number);
