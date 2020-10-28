@@ -801,6 +801,23 @@ void run_UART(uint8_t UART_number)
 	}
 }
 
+
+void disable_UART(uint8_t UART_number)
+{
+	switch (UART_number)
+	{
+		case 0 : UART0_CTL_R &=~ (1<<0);	break;
+		case 1 : UART1_CTL_R &=~ (1<<0);	break;
+		case 2 : UART2_CTL_R &=~ (1<<0);	break;
+		case 3 : UART3_CTL_R &=~ (1<<0);	break;
+		case 4 : UART4_CTL_R &=~ (1<<0);	break;
+		case 5 : UART5_CTL_R &=~ (1<<0);	break;
+		case 6 : UART6_CTL_R &=~ (1<<0);	break;
+		case 7 : UART7_CTL_R &=~ (1<<0);	break;
+		default: break;
+	}
+}
+
 void UART_send_char(uint8_t UART_number, uint8_t mydata)
 {
 	switch (UART_number)
