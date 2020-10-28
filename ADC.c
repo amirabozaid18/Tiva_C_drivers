@@ -644,6 +644,41 @@ void run_sequencer(uint8_t ADC_number,uint8_t sequencer_number)
 }
 
 
+void disable_sequencer(uint8_t ADC_number,uint8_t sequencer_number)
+{
+	switch ( ADC_number)
+	{
+		case 0:
+		{
+			switch ( sequencer_number)
+			{
+				case 0:	ADC0_ACTSS_R &=~ (1<<0);	break;
+				case 1:	ADC0_ACTSS_R &=~ (1<<1);	break;
+				case 2:	ADC0_ACTSS_R &=~ (1<<2);	break;
+				case 3:	ADC0_ACTSS_R &=~ (1<<3);	break;
+				default: break;
+			}
+			break;
+			
+		}
+		case 1:
+		{
+			switch ( sequencer_number)
+			{
+				case 0:	ADC1_ACTSS_R &=~ (1<<0);	break;
+				case 1:	ADC1_ACTSS_R &=~ (1<<1);	break;
+				case 2:	ADC1_ACTSS_R &=~ (1<<2);	break;
+				case 3:	ADC1_ACTSS_R &=~ (1<<3);	break;
+				default: break;
+			}
+			break;
+			
+		}
+		default: break;
+	}
+}
+
+
 uint16_t conversion_result(uint8_t ADC_number, uint8_t sequencer_number)
 {
 	switch ( ADC_number)
