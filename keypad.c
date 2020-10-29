@@ -7,7 +7,7 @@ location keypad_rows_location;
 location keypad_columns_location;
 
 
-void keypad_init_one_port(char port_name)						// this function is valid only for ports A, B, and D since they have 8 pins, pins 0-3 are rows while pins 4-7 are columns
+void keypad_init_one_port(char port_name)						// this function is valid only for ports A, B, C, and D since they have 8 pins, pins 0-3 are rows while pins 4-7 are columns
 {
 		initialize_port(port_name, INPUT);
 		change_pin_direction(port_name,0,OUTPUT);
@@ -25,6 +25,9 @@ void keypad_init_one_port(char port_name)						// this function is valid only fo
 		else if (port_name == 'B')
 			GPIO_PORTB_ODR_R	|= 0x0F;					// to protect rows pins in case the user pressed 2 keys in the same column
 	
+		else if (port_name == 'C')
+			GPIO_PORTC_ODR_R	|= 0x0F;					// to protect rows pins in case the user pressed 2 keys in the same column
+		
 		else if (port_name == 'D')
 			GPIO_PORTD_ODR_R	|= 0x0F;					// to protect rows pins in case the user pressed 2 keys in the same column
 
