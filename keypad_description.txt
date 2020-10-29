@@ -1,0 +1,116 @@
+This file describes the functions related to keypad (4*4).
+
+
+At first, you must know the only enumeration used with keypad:
+"location" which has only 2 values: LOWER and UPPER to determine whether you want to use pins 0-3 or pins 4-7 in a specific port.
+
+
+The functions are:
+
+
+
+1) void keypad_init_one_port(char port_name);
+
+This function is used to initialize the keypad in case you want both rows and columns to be at the same port, it is valid
+only for ports A, B, C, and D since they have 8 pins, pins 0-3 are rows while pins 4-7 are columns.
+
+Example 1: keypad_init_one_port('A') will define pins PA0-PA3 as rows and pins PA4-PA7 as columns.
+
+Example 2: keypad_init_one_port('D') will define pins PD0-PD3 as rows and pins PD4-PD7 as columns.
+
+Example 3: keypad_init_one_port('F') is useless since this function can not be used with ports E and F because
+their pins number is less than 8 (rows + columns).
+
+
+
+
+
+
+
+
+
+
+
+
+2) void keypad_init_two_half_ports( char row_half_port_name, location row_half_port_location, char column_half_port_name, location column_half_port_location);
+
+
+This function is used to initialize the keypad in case you want the rows and columns in 2 different ports.
+
+Example 1: keypad_init_two_half_ports('F',LOWER,'C',UPPER) will define pins PF0-PF3 as rows and pins PC4-PC7 as columns.
+
+Example 2: keypad_init_two_half_ports('A',UPPER,'B',LOWER) will define pins PA4-PA7 as rows and pins PB0-PB3 as columns.
+
+Example 3: keypad_init_two_half_ports('B',UPPER,'D',UPPER) will define pins PB4-PB7 as rows and pins PD4-PD7 as columns.
+
+Example 4: keypad_init_two_half_ports('F',UPPER,'E',UPPER) is useless since both ports do not have all pins from 4 to 7.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3) uint8_t is_key_pressed(void);
+
+This function checks if any key is pressed or all keys are unpressed, it returns 1 if one or more keys
+are pressed and returns 0 if all keys are unpressed.
+
+
+Example: is_key_pressed() will return 1 if any key is pressed and will return 0 if all keys are unpressed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4) char get_key_pressed(void);
+
+This function returns the char whose key is pressed by user, if no key is pressed do not use it.
+
+Example: get_key_pressed() will return the char whose key is pressed by the user.
+
+
+
+
+
+
+
+
+
+
+
+
+
+5) uint8_t is_key_released(void);
+
+This function check if all keys are unpressed or there is at least one pressed key, it returns 1 if all keys
+are unpreesed and returns 0 if there is one or more than keys are pressed.
+
+Example: is_key_released() will return 1 if there is no pressed key and return 0 if there is a pressed key.
+
+
+
+
+
+
+
+
