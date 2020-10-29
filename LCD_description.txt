@@ -1,0 +1,177 @@
+This file describes the functions used with LCD(liquid crystal display) 2*16.
+
+
+At first, you must know the only enumeration used with LCD:
+"size" which has only 2 values: FOUR_BITS and EIGHT_BITS to determine the number of pins used to send data to LCD.
+
+
+
+
+The functions used with LCD:
+
+1) void LCD_init(uint8_t lines_number, char data_port_name, char control_port_name, uint8_t rs_pin,
+uint8_t rw_pin, uint8_t e_pin, size working_mode);
+ 
+This function is used to initialize the LCD before using it.
+
+Example 1: LCD_init(2,'A','B',3,5,0,EIGHT_BITS) will define all pins in portA from PA0 to PA7 as output
+pins so MCU send data to LCD through them, PB3 as RS pin in LCD, PB5 as RW pin in LCD, PB0 as Enable pin
+in LCD, and the sent data will be displayed on the 2 lines. 
+
+Example 2: LCD_init(1,'D','F',0,2,4,EIGHT_BITS) will define all pins in portD from PD0 to PD7 as output
+pins so MCU send data to LCD through them, PF0 as RS pin in LCD, PF2 as RW pin in LCD, PF4 as Enable pin
+in LCD, and the sent data will be displayed on the first line. 
+
+Example 3: LCD_init(1,'B','E',5,3,1,FOUR_BITS) will define only the upper pins in portB from PB4 to PB7 as output
+pins so MCU send data to LCD through them, PE5 as RS pin in LCD, PE3 as RW pin in LCD, PE1 as Enable pin
+in LCD, and the sent data will be displayed on the first line. 
+
+Example 4: LCD_init(2,'E','F',0,2,4,EIGHT_BITS) is useless since PORTE pins are just from PE0 to PE5. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2) void LCD_command(uint8_t command);
+
+This function is used to send a command to LCD, you can find all commands in LCD datasheet.
+I am not sure if all commands in all LCDs are the same, so the examples below are for the one that I used.
+
+Example 1: LCD_command(0x06)  will make the Cursor shift right.
+
+Example 2: LCD_command(0x0E)  will turn on both display and cursor.
+
+Example 3: LCD_command(0x01)  will clear the LCD screen.
+
+
+
+
+
+
+
+
+
+
+
+
+3) void LCD_char(uint8_t mychar);
+
+This function is used to display one character, I prefer not using this function
+since you can display whatever you want through next 2 functions.
+
+Example 1: LCD_char('A') will display the character 'A' on LCD.
+
+Example 2: LCD_char('f') will display the character 'f' on LCD.
+
+
+
+
+
+
+
+
+
+
+
+
+4) void LCD_display_string(char* mystring);
+
+This function is used to display a string of any numbers of characters on LCD.
+
+Example 1: LCD_display_string("Welcome to LCD tutorial") will display the string(Welcome to LCD tutorial) on LCD.
+
+Example 2: LCD_display_string("W") will display the character(W) on LCD.
+
+Example 3: LCD_display_string("Kind regards, see you soon") will display the string(Kind regards, see you soon) on LCD.
+
+
+
+
+
+
+
+
+
+
+
+
+5) void LCD_display_number(int64_t mynumber);
+
+This function is used to display an integer number( positive, negative, or zero) whose size is up to 64 bits on LCD.
+
+Example 1: LCD_display_number(0) will display 0 on LCD.
+
+Example 2: LCD_display_number(-987654321) will display -987654321 on LCD.
+
+Example 2: LCD_display_number(102030405060708090) will display 102030405060708090 on LCD.
+
+
+
+
+
+
+
+
+
+
+
+
+
+6) void LCD_go_to_first_line(void);
+
+This function is used to force the LCD go to the beginning of the first line.
+
+Example: LCD_go_to_first_line() will make the LCD go to beginning of first line.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7) void LCD_go_to_second_line(void);
+
+This function is used to force the LCD go to the beginning of the second line, it can be used only if
+the lines number defined in LCD_init() is 2 lines not 1 line.
+
+Example: LCD_go_to_second_line() will make the LCD go to beginning of second line.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+8) void LCD_clear_screen(void);
+
+This function is used to clear the LCD screen.
+
+Example: LCD_clear_screen() will clear the whole LCD screen.
+
+
