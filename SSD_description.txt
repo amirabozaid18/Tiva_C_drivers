@@ -1,0 +1,104 @@
+This file describes all functions related to SSD(seven segments display).
+
+
+At first, you must know the enumerations used with SSD:
+
+1)"SSD_type" which has only 2 values: COMMON_ANODE and COMMON_CATHODE to determine the type of the SSD.
+2)"status" which has only 2 values: ENABLED and DISABLED to determine if the dot will ne used or not.
+
+
+
+The functions used with SSD are:
+
+1) void SSD_init(char data_port_name,char control_port_name, uint8_t control_pin, status dot_status, SSD_type  configuration);		
+
+This function is used to initialize the SSD before using it, data pins are
+ordered as A-B-C-D-E-F-G-DOT(if enabled) and map to pin0-pin6(if DOT is disabled) or pin0-pin7((if DOT is enabled)) respectively.
+
+Example 1: SSD_init('A','B',4,ENABLED,COMMON_ANODE) will define all pins of portA from PA0 to PA7 as data pins
+and PB4 as the control pin(used to enable/disable SSD).
+
+Example 2: SSD_init('D','F',2,DISABLED,COMMON_CATHODE) will define pins PB0 to PB6 as data pins
+and PF2 as the control pin(used to enable/disable SSD). 
+
+Example 3: SSD_init('F','A',2,ENABLED,COMMON_ANODE) is useless since the data_port_name can not be portE or portF because their pins
+number is less than 7.
+
+
+
+
+
+
+
+
+
+
+2) void SSD_show(char myinput);
+
+This function is used to display one character on SSD.
+
+Example 1: SSD_show('2') will display 2 on SSD.
+
+Example 2: SSD_show('F') will display F on SSD.
+
+
+
+
+
+
+3) void turn_SSD_on(char control_port_name, uint8_t control_pin);
+
+This function is used to make SSD work whether for first time or resume working after it was disabled.
+
+Example 1: turn_SSD_on(E,'3') will make the SSD whose control pin is PE3 start/resume working.
+
+Example 2: turn_SSD_on(C,'6') will make the SSD whose control pin is PC6 start/resume working.
+
+
+
+
+
+
+
+
+
+4) void turn_SSD_off(char control_port_name, uint8_t control_pin);
+
+This function is used to make LCD stop working.
+
+Example 1: turn_SSD_off('A',4) will make the SSD whose control pin is PA4 stop working.
+
+Example 2: turn_SSD_off('F',0) will make the SSD whose control pin is PF0 stop working.
+
+
+
+tip: for using multiple SSDs who share the same data pins to save MCU pins to
+display anything that consist of more than one digit do the following:
+
+1- turn first SSD on 
+2- display first digit on it
+3- wait few microseconds
+4- turn it off
+
+5- turn second SSD on 
+6- display second digit on it
+7- wait few microseconds
+8- turn it off
+
+9- turn third SSD on 
+10- display third digit on it
+11- wait few microseconds
+12- turn it off
+
+.
+.
+.
+.
+
+n- turn last SSD on
+n+1- display last digit on it
+n+2- wait few microseconds
+n+3- turn it off
+
+
+and the repeat the whole process with a high frequency.
