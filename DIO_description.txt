@@ -1,0 +1,348 @@
+This file describes DIO(digital input output), its enumerations all, and its functions all.
+
+Tiva c contains 6 PORTS: A, B, C, D, E, and F. The first four ports contain 8 pins from pin 0 to pin 7, port E contains
+6 pins from PE0 to PE5, and port F contains 5 pins from PF0 to PF4.
+
+Digital input pin means that this pin can receive only 2 signals: LOW and HIGH.
+Digital output pin means that this pin can drive only 2 signals: LOW and HIGH.
+
+
+The enumerations used with DIO are:
+
+1) "type" which has only 2 values: INPUT and OUTPUT to determine if a specific pin is a digital input or a digital output.
+
+2) "location" which has only 2 values: LOWER and UPPER to determine whether you want to use pins 0-3 or pins 4-7 in a specific port.
+
+3) "status" which has only 2 values: ENABLED and DISABLED to determine whether a specific interrupt will be triggered or not.
+
+4) "sensitivity" which has only 2 values: EDGE and LEVEL to determine whether the external interrupt will be
+edge-sensitive or level-sensitive.
+
+5) "count" which has only 2 values: SINGLE and BOTH to determine when the external interrupt will be triggered.
+
+6) "EVENT" which has only 2 values: RISING and FALLING to determine whether the external interrupt
+will be triggered on the rising edge(or high level) or on the falling edge (or low level).
+
+
+
+
+
+
+The functions used with DIO are:
+
+1) void initialize_port(char port_name, type port_type);
+
+This function must be used to initialize a port before using it, it defines all of its pins either digital inputs or digital outputs.
+
+Example 1: initialize_port('A',OUTPUT) will define pins PA0-PA7 as digital output pins.
+
+Example 2: initialize_port('E',INPUT) will define pins PE0-PE5 as digital input pins.
+
+
+
+
+2) void set_output_port(char port_name, uint8_t port_value);
+
+This function is used to make the port pins which were defined as digital output pins drive a specific value.
+
+Example 1: set_output_port('B',0x8E) will make the port pins from PB0 to PB7 drive following values respectively:
+LOW, HIGH, HIGH, HIGH, LOW, LOW, LOW, and HIGH.
+
+Example 2: set_output_port('F',0xF5) will make the port pins from PF0 to PF4 drive following values respectively:
+HIGH, LOW, HIGH, LOW, and HIGH. Note that any value written for pins 5, 6, and 7 will be ignored since this port contains only 5 pins.
+
+
+
+
+
+3) void set_half_port(char port_name, location half_port_location, uint8_t half_port_value);
+
+This function is used to drive a specific value on either pins 0-3 or pins 4-7 of a specific port
+which were defined as digital output pins.
+
+Example 1: set_half_port('C',UPPER,0x87) will make pins PC4-PC7 drive following values respectively:
+HIGH, HIGH, HIGH, and LOW. Note that the most significant Byte of the value will be ignored since we care with
+the least significant Byte only.
+
+Example 2: set_half_port('D',LOWER,0xC3) will make pins PD0-PD3 drive following values respectively:
+HIGH, HIGH, LOW, and LOW. Note that the most significant Byte of the value will be ignored since we care with
+the least significant Byte only.
+
+
+
+
+
+4) void clear_output_port(char port_name);
+
+This function is used to make all the port pins which were defined as digital output pins drive LOW.
+
+Example 1: clear_output_port('A') wii make pins PA0-PA7 drive LOW.
+
+Example 2: clear_output_port('E') wii make pins PE0-PE5 drive LOW.
+
+
+
+
+
+5) void clear_half_port(char port_name, location half_port_location);
+
+This function is used to make either pins 0-3 or pins 4-7 which were defined as digital output pins drive LOW.
+
+Example 1: clear_half_port('B',UPPER) will make pins PB4-PB7 drive LOW.
+
+Example 2: clear_half_port('D',KOWER) will make pins PD0-PD3 drive LOW.
+
+
+
+
+
+
+
+6) void update_port_except_last_pin(char port_name, uint8_t updated_value);
+
+This function will make all port pins(except the last pin) which were defined as digital output pins
+drive a specific value, it does not matter if the last pin was also defined as a digital output or not.
+
+Example 1: update_port_except_last_pin('A',0xFF) will make pins PA0-PA6 drive HIGH and there is no effect on PA7.
+
+Example 2: update_port_except_last_pin('F',0x77) will make pins PF0-PF2 drive HIGH, PF3 drive LOW, and there is no effect on PF4.
+
+
+
+
+
+
+7) void update_port_except_last_two_pins(char port_name, uint8_t updated_value);
+
+
+This function will make all port pins(except the last 2 pins) which were defined as digital output pins
+drive a specific value, it does not matter if the last 2 pins were also defined as a digital output or not.
+
+Example 1: update_port_except_last_two_pins('B',0x55) will make pina PB0, PB2, and PB4 drive High, pins PB1, PB3, PB5 drive
+LOW, and there is no effect on pins PB6 and PB7.
+
+Example 2: update_port_except_last_two_pins('E',0x3C) will make pina PE0 and PE1 drive LOW, pins PE2 and PE3 drive 
+HIGH, and there is no effect on pins PE4 and PE5.
+
+
+
+
+
+
+8) uint8_t is_whole_port_output(char port_name);
+
+This function is used to check if all pins of a specific port were defined as digital output pins or not, it
+returns 3 values not only 2 values:
+a- it returns 1 if all pins of a port whose name is valid were defined as digital output pins.
+b- it returns 0 if not all pins of a port whose name is valid were defined as digital output pins.
+c- it returns 0xFF if the port name is invalid.
+
+Example 1: is_whole_port_output('A') will return 1 if pins PA0-PA7 were defined as digital output 
+pins or it will reurn 0 if one or more pins were not defined as digital output pins.
+
+Example 2: is_whole_port_output('Z') will return 0xFF since port name should be one of six charcters: A, B, C, D, E, and F.
+
+
+
+
+
+
+
+9) uint8_t is_whole_port_input(char port_name);
+
+This function is used to check if all pins of a specific port were defined as digital input pins or not, it
+returns 3 values not only 2 values:
+a- it returns 1 if all pins of a port whose name is valid were defined as digital input pins.
+b- it returns 0 if not all pins of a port whose name is valid were defined as digital input pins.
+c- it returns 0xFF if the port name is invalid.
+
+Example 1: is_whole_port_input('E') will return 1 if pins PE0-PE5 were defined as digital input 
+pins or it will reurn 0 if one or more pins were not defined as digital input pins.
+
+Example 2: is_whole_port_input('K') will return 0xFF since port name should be one of six charcters: A, B, C, D, E, and F.
+
+
+
+
+
+10) uint8_t read_input_port(char port_name);
+
+This function will return the data received by the port pins which were all defined as digital input pins.
+
+Example 1: read_input_port('D') will return the data received by pins PD0-PD7.
+
+Example 2: read_input_port('F') will return the data received by pins PF0-PF4.
+
+
+
+
+
+11) void initialize_pin(char port_name, uint8_t pin_number , type pin_type);
+
+This function is used to initialize a pin before using it, this function is useless if you used initialize_port() with
+the port containing this pin before.
+
+Example 1: initialize_pin('C','6;,OUTPUT) will define PC6 as a digital output pin.
+
+Example 2: initialize_pin('F','4;,INPUT) will define PF4 as a digital input pin.
+
+
+
+
+
+12) void change_pin_direction (char port_name, uint8_t pin_number, type pin_type);
+
+This function can not be used without using initialize_port() before, if port was defined as output and you
+want to define a specific pin in this port as input or vice versa, use this function.
+
+Example 1: change_pin_direction ('B',2,OUTPUT) will redefine PB2 to be a digital output pin after it was 
+defined before as a digital input pin like all port B pins using initialize_port('B',INPUT).
+
+Example 2: change_pin_direction ('A',5,INPUT) will redefine PA5 to be a digital input pin after it was 
+defined before as a digital output pin like all port A pins using initialize_port('A',OUTPUT).
+
+
+
+
+
+
+13) void set_pin_alternative_function(char port_name,uint8_t pin_number,uint8_t control_value);
+
+This function is used to define a specific pin not as a DIO but as an alternative function.
+
+Important note: this function is useless if the module using this pin was not initialized, so do not be 
+worry about ADC, TIMER, and UART modules since I included this function inside their initializtion and you do not have 
+to use this function while using any of these modules.
+
+Example 1: set_pin_alternative_function('D',5,7) will define pin PD5 as a wide timer 4 CCP1.
+
+Example 2: set_pin_alternative_function('E',4,1) will define pin PE4 as a UART5 receiver.
+
+
+
+
+
+14) void set_output_pin(char port_name, uint8_t pin_number);
+
+This function is used to make a digital output pin drive HIGH.
+
+Example 1: set_output_pin('F',2) will make pin PF2 which was defined as a digital output pin drive HIGH.
+
+Example 2: set_output_pin('B',4) will make pin PB4 which was defined as a digital output pin drive HIGH.
+
+
+
+
+
+
+
+15) void clear_output_pin(char port_name, uint8_t pin_number);
+
+This function is used to make a digital output pin drive LOW.
+
+Example 1: clear_output_pin('A',7) will make pin PA7 which was defined as a digital output pin drive LOW.
+
+Example 2: clear_output_pin('D',3) will make pin PD3 which was defined as a digital output pin drive LOW.
+
+
+
+
+
+
+16) void toggle_output_pin(char port_name, uint8_t pin_number);
+
+This function is used to make a digital output pin drive LOW after if it drived HIGH last time or vice versa.
+
+Example 1: toggle_output_pin('E',5) will make pin PE5 drive an opposite value for the value it drived before using this function.
+
+Example 2: toggle_output_pin('A',3) will make pin PA3 drive an opposite value for the value it drived before using this function.
+
+
+
+
+
+17) uint8_t read_input_pin(char port_name, uint8_t pin_number);
+
+This function is used to return the value(HIGH or LOW) received by a digital input pin.
+
+Example: read_input_pin('B',0) will return the value received by pin PB0 which was defined as a digital input pin.
+
+
+
+
+
+
+
+18) void trigger_external_interrupt(char port_name, uint8_t pin_number, sensitivity interrupt_sensitivity,
+count edge_count, EVENT interrupt_event, uint8_t interrupt_priority);
+
+
+This function is used to trigger an external interrupt, the used pin must be defined as a digital input pin.
+Important note: when edge_count is BOTH this means that interrupt_sensitivity must be EDGE, but when edge_count is SINGLE, this
+means that interrupt_sensitivity may be EDGE or LEVEL.
+
+Example 1: trigger_external_interrupt('F',0,EDGE,SINGLE,FALLING,1) will trigger an interrupt with a priority equals 1
+if a falling edge are sensed through pin PF0.
+
+Example 2: trigger_external_interrupt('E',4,LEVEL,SINGLE,RISING,2) will trigger an interrupt with a priority equals 2
+if a high level are sensed through pin PE4.
+
+Example 3: trigger_external_interrupt('A',2,LEVEL,BOTH,RISING,0) is useless since interrupt_sensitivity must be EDGE
+because edge_count is BOTH.
+
+Example 4: trigger_external_interrupt('A',2,EDGE,BOTH,RISING,0) will trigger an interrupt with a priority equlas 0
+if both falling and rising edges are sensed through pin PA2.
+
+Note that if edge_count is "BOTH", the interrupt_event value will be ignored.
+
+
+
+
+
+
+
+
+next 3 functions are not related to only DIO, but I put them in DIO since DIO.h is included in many files and 
+many modules use these functions.
+
+19) void delayMs(uint64_t n);
+
+This function is used to make a delay of any number of milliseconds.
+
+very Important note: the implementation of this function is based on using 16 MHZ for system clock, if you use 
+another value for system clock then you have to modify this function implementation.
+
+Example 1: delayMs(30) will make a delay of 30 milliseconds.
+
+Example 2: delayMs(5000) will make a delay of 5 seconds.
+
+
+
+
+
+
+
+20) void delayUs(uint64_t n);
+
+This function is used to make a delay of any number of microseconds.
+
+very Important note: the implementation of this function is based on using 16 MHZ for system clock, if you use 
+another value for system clock then you have to modify this function implementation.
+
+Example 1: delayUs(20) will make a delay of 20 microseconds.
+
+Example 2: delayUs(9000) will make a delay of 9 milliseconds.
+
+
+
+
+
+
+
+21) uint64_t power(uint32_t base, uint8_t exponent);
+
+This function do the same mission of built-in function pow() which is in "math.c" but for positive integers only with some limitations
+on the size of base and exponent, I implemented this function to avoid using pow() because of the big size of "math.h" that must be included
+to use pow().
+
+Example: power(2,6) will return 64.
