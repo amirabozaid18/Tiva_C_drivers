@@ -7,8 +7,10 @@
 
 typedef enum direction_type { INPUT , OUTPUT } type;
 typedef enum index_type { LOWER , UPPER } location;
-
-// for following functions, we deal with PORTC as it contains only bits 4-7 since bits 0-3 are used for JTAG pins
+typedef enum current_status {ENABLED, DISABLED} status;
+typedef enum external_interrupt_sensitivity { EDGE, LEVEL} sensitivity;
+typedef enum external_interrupt_edge_count { SINGLE, BOTH } count;
+typedef enum external_interrupt_event { RISING, FALLING } EVENT;
 
 void initialize_port(char port_name, type port_type);
 void set_output_port(char port_name, uint8_t port_value);
@@ -20,14 +22,20 @@ void update_port_except_last_two_pins(char port_name, uint8_t updated_value);
 uint8_t is_whole_port_output(char port_name);
 uint8_t is_whole_port_input(char port_name);
 uint8_t read_input_port(char port_name);
-void initialize_pin(char port_name, uint8_t pin_number , type pin_type); 					// this function is used if the port containing this pin is not initialized
-void change_pin_direction (char port_name, uint8_t pin_number, type pin_type);		// this function must be used after initialize_port() only if port is defined as output and you want to define a pin it this port as input and vice versa
-void set_output_pin(char port_name, uint8_t pin_number);		// this function must be used after change_pin_direction() only if this pin is in a port which was defined as input port, else you can call it directly after port initiallization
-void clear_output_pin(char port_name, uint8_t pin_number);		// this function must be used after change_pin_direction() only if this pin is in a port which was defined as input port, else you can call it directly after port initiallization
-void toggle_output_pin(char port_name, uint8_t pin_number);		// this function must be used after change_pin_direction() only if this pin is in a port which was defined as input port, else you can call it directly after port initiallization
-uint8_t read_input_pin(char port_name, uint8_t pin_number);
+void initialize_pin(char port_name, uint8_t pin_number , type pin_type);
+void change_pin_direction (char port_name, uint8_t pin_number, type pin_type);
+void set_pin_alternative_function(char port_name,uint8_t pin_number,uint8_t control_value);
+void set_output_pin(char port_name, uint8_t pin_number);	
+void clear_output_pin(char port_name, uint8_t pin_number);	
+void toggle_output_pin(char port_name, uint8_t pin_number);		
+uint8_t read_input_pin(char port_name, uint8_t pin_number);		
+void trigger_external_interrupt(char port_name, uint8_t pin_number, sensitivity interrupt_sensitivity, count edge_count, EVENT interrupt_event, uint8_t interrupt_priority);
 
-void delayMs(int n);
-void delayUs(int n);
+
+
+void delayMs(uint64_t n);
+void delayUs(uint64_t n);
+uint64_t power(uint32_t base, uint8_t exponent);
+
 
 #endif
